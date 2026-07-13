@@ -63,45 +63,30 @@ const ProductCard = ({ product, onQuickView }) => {
         </div>
       </Link>
 
-      <div className="product-info">
-        <div className="product-category">{product.category}</div>
+      <div className="product-info" style={{ padding: '16px 12px', display: 'flex', flexDirection: 'column', flex: 1 }}>
         <Link href={`/product/${product.id || product._id}`}>
-          <h3 className="product-name">{product.name}</h3>
+          <h3 className="product-name" style={{ fontSize: '14px', lineHeight: '1.4', marginBottom: '6px' }}>{product.name}</h3>
         </Link>
+        
+        <p className="product-desc" style={{ fontSize: '12px', color: '#666', marginBottom: '12px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          {product.description || 'Experience the elegance of traditional craftsmanship with this exquisite piece.'}
+        </p>
 
-        <div className="product-rating" style={{ marginBottom: 8 }}>
-          <div className="stars">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                size={11}
-                fill={i < Math.round(product.rating) ? 'currentColor' : 'none'}
-              />
-            ))}
-          </div>
-          <span className="rating-count">({product.reviews})</span>
-        </div>
-
-        <div className="product-meta">
-          <div className="product-price">
-            {product.oldPrice && <span className="price-old">${product.oldPrice}</span>}
+        <div className="product-meta" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px', marginBottom: '16px', marginTop: 'auto' }}>
+          <div className="product-price" style={{ fontSize: '16px', fontWeight: '600', color: '#111' }}>
+            {product.oldPrice && <span className="price-old" style={{ textDecoration: 'line-through', color: '#999', fontSize: '13px', marginRight: '8px', fontWeight: '400' }}>${product.oldPrice}</span>}
             ${product.price}
           </div>
+          <span style={{ background: '#10b981', color: 'white', padding: '4px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>Free Shipping</span>
         </div>
 
-        {product.colors && product.colors.length > 0 && (
-          <div className="product-swatches">
-            {product.colors.map((c, i) => (
-              <button
-                key={i}
-                className={`swatch ${i === selectedColor ? 'active' : ''}`}
-                style={{ background: c === 'silver' ? '#C0C0C0' : c === 'gold' ? '#C9A84C' : c }}
-                onClick={() => setSelectedColor(i)}
-                aria-label={`Color option ${i + 1}`}
-              />
-            ))}
-          </div>
-        )}
+        <Link 
+          href={`/product/${product.id || product._id}`} 
+          className="btn-primary" 
+          style={{ display: 'block', width: '100%', textAlign: 'center', padding: '10px 0', fontSize: '14px', borderRadius: '4px' }}
+        >
+          View Details
+        </Link>
       </div>
     </div>
   );

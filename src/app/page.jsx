@@ -49,6 +49,21 @@ export default function Home() {
   const [aiOpen, setAiOpen] = useState(false);
   const [trendTab, setTrendTab] = useState(0);
 
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const heroImages = [
+    '/assets/hero_model.png',
+    '/assets/wedding.png',
+    '/assets/children.png',
+    '/assets/mens_outfit.png'
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [heroImages.length]);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       entries => {
@@ -73,7 +88,28 @@ export default function Home() {
   return (
     <main id="main-content">
       <section className="hero" aria-label="Hero">
-        <div className="hero-left">
+        <div className="hero-background">
+          <div style={{ 
+            display: 'flex', 
+            width: '100%', 
+            height: '100%', 
+            transition: 'transform 0.8s ease-in-out', 
+            transform: `translateX(-${currentImageIndex * 100}%)` 
+          }}>
+            {heroImages.map((img, idx) => (
+              <div key={img} style={{ width: '100%', height: '100%', flexShrink: 0, position: 'relative' }}>
+                <img
+                  src={img}
+                  alt={`Hero model ${idx + 1}`}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)' }}></div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="hero-content">
           <span className="hero-eyebrow">Authentic · Handcrafted · Premium</span>
           <h1 className="hero-title">
             The Essence of<br /><em>Ethiopian</em> Elegance
@@ -86,7 +122,7 @@ export default function Home() {
             <button className="btn-primary btn-gold" onClick={() => document.getElementById('collections')?.scrollIntoView({ behavior: 'smooth' })}>
               Shop the Collection
             </button>
-            <button className="btn-primary btn-outline" onClick={() => document.getElementById('arrivals')?.scrollIntoView({ behavior: 'smooth' })}>
+            <button className="btn-primary btn-outline" style={{ color: 'var(--white)', borderColor: 'rgba(255,255,255,0.3)' }} onClick={() => document.getElementById('arrivals')?.scrollIntoView({ behavior: 'smooth' })}>
               New Arrivals
             </button>
           </div>
@@ -101,28 +137,6 @@ export default function Home() {
                 <div className="hero-stat-label">{s.label}</div>
               </div>
             ))}
-          </div>
-        </div>
-
-        <div className="hero-right">
-          <img src="/assets/hero_model.png" alt="Woman wearing Gold Tilet Habesha Kemis" className="hero-main-img" />
-
-          <div className="hero-badge hero-badge-1">
-            <img src="/assets/fabric_texture.png" alt="Fabric" />
-            <div className="hero-badge-text">
-              <div className="hero-badge-title">Premium Tilet</div>
-              <div className="hero-badge-sub">Gold handwoven thread</div>
-              <div className="hero-badge-price">From $89</div>
-            </div>
-          </div>
-
-          <div className="hero-badge hero-badge-2">
-            <img src="/assets/accessories.png" alt="Accessories" />
-            <div className="hero-badge-text">
-              <div className="hero-badge-title">Artisan Silver Set</div>
-              <div className="hero-badge-sub">Lalibela, Ethiopia</div>
-              <div className="hero-badge-price">$68</div>
-            </div>
           </div>
         </div>
       </section>
@@ -146,6 +160,9 @@ export default function Home() {
           <div>
             <div className="section-eyebrow">Explore</div>
             <h2 className="section-title">Shop by Collection</h2>
+            <p className="section-subtitle">
+              From everyday elegance to ceremonial grandeur — discover curated lines that celebrate every facet of Ethiopian culture, crafted to fit your occasion perfectly.
+            </p>
           </div>
           <a href="/#arrivals" className="link-all" onClick={(e) => { e.preventDefault(); document.getElementById('arrivals')?.scrollIntoView({ behavior: 'smooth' }); }}>
             View All <ChevronRight size={15} />
@@ -179,6 +196,9 @@ export default function Home() {
           <div>
             <div className="section-eyebrow">Just In</div>
             <h2 className="section-title">New Arrivals</h2>
+            <p className="section-subtitle">
+              Fresh from the looms of Addis Ababa — our latest pieces blend centuries-old weaving traditions with contemporary silhouettes, available now for worldwide delivery.
+            </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <ScrollArrow dir="left" containerId="arrivals-scroll" />
@@ -200,7 +220,8 @@ export default function Home() {
           <h2 className="wedding-banner-title">Your Perfect<br />Wedding Kemis</h2>
           <p className="wedding-banner-subtitle">
             Bespoke, handcrafted bridal Habesha Kemis made to your exact measurements.
-            Every stitch tells a story of love and heritage.
+            Every stitch tells a story of love and heritage. Walk down the aisle draped
+            in the finest Ethiopian silk tilet — a garment as unique as your love story.
           </p>
           <div style={{ display: 'flex', gap: 12 }}>
             <a href="/#collections" className="btn-primary btn-gold" style={{ display: 'inline-flex', alignItems: 'center' }}>Explore Bridal</a>
@@ -240,7 +261,8 @@ export default function Home() {
             </h2>
             <p style={{ fontSize: 15, color: 'rgba(255,255,255,.55)', lineHeight: 1.75, maxWidth: 480 }}>
               Not sure which dress to choose for your occasion? Our AI styling assistant
-              knows Ethiopian fashion inside and out — ask anything, from sizing to Tilet patterns.
+              knows Ethiopian fashion inside and out — ask anything, from sizing to Tilet patterns,
+              choosing the right fabric for a wedding, or finding the perfect family matching set.
             </p>
           </div>
           <div>
@@ -260,6 +282,9 @@ export default function Home() {
           <div>
             <div className="section-eyebrow">What's Hot</div>
             <h2 className="section-title">Trending Now</h2>
+            <p className="section-subtitle">
+              The styles our community loves most right now — ranked by popularity, rated by real customers, and loved across 60+ countries. Filter by category to find your perfect piece.
+            </p>
           </div>
         </div>
 
@@ -300,6 +325,9 @@ export default function Home() {
             <p>
               At Habesha Heritage, we partner directly with over 500 master artisans across Addis Ababa, Gondar, Lalibela, and Axum, ensuring fair wages and preserving these ancient techniques for the world to cherish.
             </p>
+            <p style={{ fontSize: 14, fontStyle: 'italic', color: 'var(--muted)', borderLeft: '3px solid var(--gold)', paddingLeft: 16, marginTop: 4 }}>
+              "Every thread woven is a prayer, a memory, and a promise passed to the next generation." — Tigist Alemu, Master Weaver, Addis Ababa
+            </p>
             <div className="story-pillars">
               {[
                 { icon: '✦', title: 'Master Artisans', desc: 'Each piece is handcrafted by certified artisan partners' },
@@ -323,6 +351,9 @@ export default function Home() {
           <div>
             <div className="section-eyebrow">Customer Love</div>
             <h2 className="section-title">What Our Customers Say</h2>
+            <p className="section-subtitle">
+              Real stories from real people across the globe — from the Ethiopian diaspora in Washington DC to families celebrating weddings in London and Sydney.
+            </p>
           </div>
         </div>
 
@@ -360,6 +391,9 @@ export default function Home() {
           <div>
             <div className="section-eyebrow" style={{ color: 'var(--gold-light)' }}>Global Delivery</div>
             <h2 className="section-title">Why Shop with Us</h2>
+            <p className="section-subtitle" style={{ color: 'rgba(255,255,255,.5)' }}>
+              We have spent years perfecting our delivery and quality promise so you can shop with complete confidence — wherever in the world you call home.
+            </p>
           </div>
         </div>
         <div className="shipping-grid">
@@ -381,8 +415,8 @@ export default function Home() {
       <section className="newsletter-section">
         <div className="section-eyebrow" style={{ justifyContent: 'center', marginBottom: 12 }}>Stay Connected</div>
         <h2 className="section-title" style={{ textAlign: 'center', marginBottom: 12 }}>Join 25,000+ Fashion Lovers</h2>
-        <p style={{ color: 'var(--warm-gray)', fontSize: 15, textAlign: 'center', maxWidth: 440, margin: '0 auto' }}>
-          Get early access to new collections, exclusive discounts, and artisan stories straight to your inbox.
+        <p style={{ color: 'var(--warm-gray)', fontSize: 15, textAlign: 'center', maxWidth: 480, margin: '0 auto' }}>
+          Get early access to new collections, exclusive discounts, artisan stories, and seasonal style guides straight to your inbox — curated just for you.
         </p>
         <form
           className="newsletter-form"

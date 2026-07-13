@@ -44,10 +44,6 @@ const Navbar = () => {
 
   return (
     <>
-      <div className="top-banner" role="banner">
-        <span>Free worldwide shipping on orders over $250</span>
-      </div>
-
       <nav className={`navbar ${scrolled ? 'scrolled' : ''}`} role="navigation" aria-label="Main navigation">
         <Link href="/" className="navbar-logo" aria-label="Habesha Heritage Home">
           Habesha Heritage.
