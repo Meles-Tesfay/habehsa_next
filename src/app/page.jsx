@@ -41,7 +41,7 @@ const COLLECTIONS = [
   { label: "Artisan", name: "Handmade Accessories", img: '/assets/accessories.png' },
 ];
 
-const TREND_TABS = ["Women's", "Men's", 'Bridal', 'Accessories'];
+const TREND_TABS = ["All", "Women's", "Men's", 'Bridal', 'Accessories', "Children's"];
 
 export default function Home() {
   const { products } = useShop();
@@ -79,10 +79,24 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
-  const GENDER_MAP = { "Women's": 'women', "Men's": 'men', 'Bridal': 'women', 'Accessories': null };
-  const activeGender = GENDER_MAP[TREND_TABS[trendTab]];
+  const CATEGORY_MAP = {
+    "All": null,
+    "Women's": ["Women's Kemis", "Women's"],
+    "Men's": ["Men's Traditional", "Men's"],
+    "Bridal": ["Bridal Collection", "Bridal"],
+    "Accessories": ["Accessories"],
+    "Children's": ["Children's Wear", "Children's"],
+  };
+
+  const activeTab = TREND_TABS[trendTab];
+  const activeCategories = CATEGORY_MAP[activeTab];
   const trendProducts = products
-    .filter(p => activeGender === null || p.gender === activeGender || !p.gender)
+    .filter(p => {
+      if (!activeCategories) return true; // "All"
+      return activeCategories.some(cat =>
+        p.category?.toLowerCase().includes(cat.toLowerCase())
+      );
+    })
     .slice(0, 8);
 
   return (
@@ -122,8 +136,8 @@ export default function Home() {
             <button className="btn-primary btn-gold" onClick={() => document.getElementById('collections')?.scrollIntoView({ behavior: 'smooth' })}>
               Shop the Collection
             </button>
-            <button className="btn-primary btn-outline" style={{ color: 'var(--white)', borderColor: 'rgba(255,255,255,0.3)' }} onClick={() => document.getElementById('arrivals')?.scrollIntoView({ behavior: 'smooth' })}>
-              New Arrivals
+            <button className="btn-primary btn-outline" style={{ color: 'var(--white)', borderColor: 'rgba(255,255,255,0.3)' }} onClick={() => document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' })}>
+              Browse All
             </button>
           </div>
           <div className="hero-stats">
@@ -155,16 +169,17 @@ export default function Home() {
         ))}
       </div>
 
+      {/* Collections overview grid */}
       <section id="collections" className="section">
         <div className="section-header">
           <div>
-            <div className="section-eyebrow">Explore</div>
+            <div className="section-eyebrow">Browse</div>
             <h2 className="section-title">Shop by Collection</h2>
             <p className="section-subtitle">
-              From everyday elegance to ceremonial grandeur — discover curated lines that celebrate every facet of Ethiopian culture, crafted to fit your occasion perfectly.
+              From everyday elegance to ceremonial grandeur — discover curated lines for every occasion.
             </p>
           </div>
-          <a href="/#arrivals" className="link-all" onClick={(e) => { e.preventDefault(); document.getElementById('arrivals')?.scrollIntoView({ behavior: 'smooth' }); }}>
+          <a href="#shop" className="link-all" onClick={(e) => { e.preventDefault(); document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' }); }}>
             View All <ChevronRight size={15} />
           </a>
         </div>
@@ -179,8 +194,8 @@ export default function Home() {
                 <button 
                   className="collection-card-btn" 
                   onClick={() => {
-                    document.getElementById('trending')?.scrollIntoView({ behavior: 'smooth' });
-                    setTrendTab(i);
+                    document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' });
+                    setTrendTab(i + 1); // +1 because index 0 = "All"
                   }}
                 >
                   Shop Now <ChevronRight size={14} />
@@ -191,28 +206,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="arrivals" className="section section-cream">
-        <div className="section-header">
-          <div>
-            <div className="section-eyebrow">Just In</div>
-            <h2 className="section-title">New Arrivals</h2>
-            <p className="section-subtitle">
-              Fresh from the looms of Addis Ababa — our latest pieces blend centuries-old weaving traditions with contemporary silhouettes, available now for worldwide delivery.
-            </p>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <ScrollArrow dir="left" containerId="arrivals-scroll" />
-            <ScrollArrow dir="right" containerId="arrivals-scroll" />
-          </div>
-        </div>
-
-        <div className="products-scroll" id="arrivals-scroll">
-          {products.map(p => (
-            <ProductCard key={p.id || p._id} product={p} onQuickView={setQuickViewProduct} />
-          ))}
-        </div>
-      </section>
-
+      {/* Bridal feature banner */}
       <section className="wedding-banner" aria-label="Bridal Collection">
         <img src="/assets/wedding.png" alt="Ethiopian Bridal Kemis" />
         <div className="wedding-banner-content">
@@ -224,7 +218,15 @@ export default function Home() {
             in the finest Ethiopian silk tilet — a garment as unique as your love story.
           </p>
           <div style={{ display: 'flex', gap: 12 }}>
-            <a href="/#collections" className="btn-primary btn-gold" style={{ display: 'inline-flex', alignItems: 'center' }}>Explore Bridal</a>
+            <button
+              className="btn-primary btn-gold"
+              onClick={() => {
+                document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' });
+                setTrendTab(TREND_TABS.indexOf('Bridal'));
+              }}
+            >
+              Explore Bridal
+            </button>
             <button
               className="btn-primary"
               style={{ background: 'rgba(255,255,255,.12)', borderColor: 'rgba(255,255,255,.3)', backdropFilter: 'blur(8px)' }}
@@ -236,55 +238,19 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section">
-        <div
-          style={{
-            background: 'linear-gradient(135deg, var(--charcoal) 0%, #2C2416 100%)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '56px 64px',
-            display: 'grid',
-            gridTemplateColumns: '1fr auto',
-            gap: 48,
-            alignItems: 'center',
-          }}
-          className="animate-fade-up ai-promo-box"
-        >
-          <div className="ai-promo-content" style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-              <div style={{ width: 40, height: 40, background: 'linear-gradient(135deg, var(--gold), var(--gold-dark))', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-                <Sparkles size={18} />
-              </div>
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--gold-light)' }}>AI Style Assistant</span>
-            </div>
-            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 32, fontWeight: 700, color: 'white', marginBottom: 12, lineHeight: 1.2, letterSpacing: '-.02em' }}>
-              Your Personal<br />Ethiopian Fashion Advisor
-            </h2>
-            <p style={{ fontSize: 15, color: 'rgba(255,255,255,.55)', lineHeight: 1.75, maxWidth: 480 }}>
-              Not sure which dress to choose for your occasion? Our AI styling assistant
-              knows Ethiopian fashion inside and out — ask anything, from sizing to Tilet patterns,
-              choosing the right fabric for a wedding, or finding the perfect family matching set.
-            </p>
-          </div>
-          <div>
-            <button
-              className="btn-primary btn-gold"
-              style={{ whiteSpace: 'nowrap' }}
-              onClick={() => setAiOpen(true)}
-            >
-              <Sparkles size={15} /> Try Style AI
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section id="trending" className="section section-cream">
+      {/* Unified product section with category tabs */}
+      <section id="shop" className="section section-cream">
         <div className="section-header">
           <div>
-            <div className="section-eyebrow">What's Hot</div>
-            <h2 className="section-title">Trending Now</h2>
+            <div className="section-eyebrow">Our Collection</div>
+            <h2 className="section-title">Find Your Style</h2>
             <p className="section-subtitle">
-              The styles our community loves most right now — ranked by popularity, rated by real customers, and loved across 60+ countries. Filter by category to find your perfect piece.
+              Browse our full range of authentic Ethiopian clothing — filter by category to find exactly what you're looking for.
             </p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <ScrollArrow dir="left" containerId="shop-scroll" />
+            <ScrollArrow dir="right" containerId="shop-scroll" />
           </div>
         </div>
 
@@ -300,16 +266,14 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="products-grid trending-grid">
-          {trendProducts.map((p, rank) => (
-            <div key={p.id || p._id} style={{ position: 'relative' }}>
-              <span className="trend-rank">#{rank + 1}</span>
-              <ProductCard product={p} onQuickView={setQuickViewProduct} />
-            </div>
+        <div className="products-scroll" id="shop-scroll">
+          {trendProducts.map(p => (
+            <ProductCard key={p.id || p._id} product={p} onQuickView={setQuickViewProduct} />
           ))}
         </div>
       </section>
 
+      {/* Brand story */}
       <section id="story" className="section">
         <div className="story-layout animate-fade-up">
           <div className="story-imgs">
@@ -346,6 +310,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Reviews */}
       <section className="section section-cream" id="reviews">
         <div className="section-header">
           <div>
@@ -386,10 +351,11 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Trust / Why us */}
       <section className="section shipping-section">
         <div className="section-header" style={{ marginBottom: 0 }}>
           <div>
-            <div className="section-eyebrow" style={{ color: 'var(--gold-light)' }}>Global Delivery</div>
+            <div className="section-eyebrow" style={{ color: 'var(--gold-light)' }}>Our Promise</div>
             <h2 className="section-title">Why Shop with Us</h2>
             <p className="section-subtitle" style={{ color: 'rgba(255,255,255,.5)' }}>
               We have spent years perfecting our delivery and quality promise so you can shop with complete confidence — wherever in the world you call home.
@@ -412,6 +378,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Newsletter */}
       <section className="newsletter-section">
         <div className="section-eyebrow" style={{ justifyContent: 'center', marginBottom: 12 }}>Stay Connected</div>
         <h2 className="section-title" style={{ textAlign: 'center', marginBottom: 12 }}>Join 25,000+ Fashion Lovers</h2>

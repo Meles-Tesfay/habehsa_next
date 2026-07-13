@@ -4,30 +4,35 @@
 
 /* ---- Tokens ---- */
 :root {
-  --gold:        #C9A84C;
-  --gold-light:  #E2C97E;
-  --gold-dark:   #9B7B2E;
-  --cream:       #FDFAF4;
-  --cream-2:     #F7F2E9;
-  --cream-3:     #EEE6D5;
-  --charcoal:    #1C1810;
-  --charcoal-2:  #2C2416;
-  --warm-gray:   #7A6F62;
-  --muted:       #B0A396;
-  --navy:        #1A2B4A;
-  --green:       #2D5A27;
-  --red-dark:    #8B1A1A;
-  --white:       #FFFFFF;
-  --shadow-sm:   0 2px 8px rgba(28,24,16,.06);
-  --shadow-md:   0 4px 24px rgba(28,24,16,.09);
-  --shadow-lg:   0 12px 48px rgba(28,24,16,.12);
-  --radius-sm:   8px;
-  --radius-md:   14px;
-  --radius-lg:   24px;
-  --font-serif:  'Cormorant Garamond', 'Playfair Display', Georgia, serif;
-  --font-sans:   'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --ease-out:    cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --gold:          #C9A84C;
+  --gold-light:    #E2C97E;
+  --gold-dark:     #9B7B2E;
+  --terracotta:    #C45E3E;
+  --terracotta-lt: #E8825F;
+  --terracotta-dk: #9B3C22;
+  --forest:        #2E6B45;
+  --forest-lt:     #4A9C6A;
+  --cream:         #FDFAF4;
+  --cream-2:       #F7F2E9;
+  --cream-3:       #EEE6D5;
+  --charcoal:      #1C1810;
+  --charcoal-2:    #2C2416;
+  --warm-gray:     #7A6F62;
+  --muted:         #B0A396;
+  --navy:          #1A2B4A;
+  --green:         #2D5A27;
+  --red-dark:      #8B1A1A;
+  --white:         #FFFFFF;
+  --shadow-sm:     0 2px 8px rgba(28,24,16,.06);
+  --shadow-md:     0 4px 24px rgba(28,24,16,.09);
+  --shadow-lg:     0 12px 48px rgba(28,24,16,.12);
+  --radius-sm:     8px;
+  --radius-md:     14px;
+  --radius-lg:     24px;
+  --font-serif:    'Raleway', 'Playfair Display', Georgia, serif;
+  --font-sans:     'Nunito', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --ease-out:      cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* ---- Reset ---- */
@@ -377,23 +382,23 @@ a { text-decoration: none; color: inherit; }
 }
 .section-eyebrow {
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: .14em;
+  font-weight: 800;
+  letter-spacing: .16em;
   text-transform: uppercase;
-  color: var(--gold-dark);
+  color: var(--terracotta);
   margin-bottom: 8px;
   display: flex;
   align-items: center;
   gap: 10px;
 }
-.section-eyebrow::before { content: ''; display: block; width: 24px; height: 1.5px; background: var(--gold); }
+.section-eyebrow::before { content: ''; display: block; width: 24px; height: 2px; background: linear-gradient(90deg, var(--terracotta), var(--gold)); }
 .section-title {
   font-family: var(--font-serif);
   font-size: clamp(32px, 3.5vw, 48px);
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.1;
   color: var(--charcoal);
-  letter-spacing: -.02em;
+  letter-spacing: -.01em;
 }
 .section-dark .section-title { color: var(--white); }
 .section-subtitle {
