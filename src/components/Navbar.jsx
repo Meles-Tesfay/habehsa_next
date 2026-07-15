@@ -62,16 +62,25 @@ const Navbar = () => {
           ) : (
             <Link href="/login" className="sell-btn" onClick={() => setMobileOpen(false)}>Sign In</Link>
           )}
+          
+          <div className="mobile-only-links">
+            <a href="#" onClick={(e) => { e.preventDefault(); handleUserClick(); }}>
+              <User size={18} /> Account
+            </a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setMobileOpen(false); /* trigger wishlist if possible, else just link */ }}>
+              <Heart size={18} /> Wishlist {wishlist.length > 0 && `(${wishlist.length})`}
+            </a>
+          </div>
         </div>
 
         <div className="nav-actions">
-          <button className="nav-icon-btn" aria-label="Account" onClick={handleUserClick}>
+          <button className="nav-icon-btn hide-on-mobile" aria-label="Account" onClick={handleUserClick}>
             <User size={20} strokeWidth={1.5} />
           </button>
           <button className="nav-icon-btn" onClick={() => setSearchOpen(true)} aria-label="Search">
             <Search size={20} strokeWidth={1.5} />
           </button>
-          <button className="nav-icon-btn" aria-label="Wishlist">
+          <button className="nav-icon-btn hide-on-mobile" aria-label="Wishlist">
             <Heart size={20} strokeWidth={1.5} />
             {wishlist.length > 0 && <span className="badge blue-badge">{wishlist.length}</span>}
           </button>

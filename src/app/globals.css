@@ -3254,3 +3254,112 @@ tbody tr:hover { background: rgba(0,0,0,.015); }
   border-color: var(--gold);
   outline: none;
 }
+
+/* ================================================================
+   MOBILE RESPONSIVENESS FIXES
+   ================================================================ */
+@media (max-width: 900px) {
+  /* Fix Account Dashboard overlap and scroll issues */
+  .cdp-root {
+    display: flex;
+    flex-direction: column;
+    min-height: auto;
+  }
+  .cdp-sidebar {
+    position: static;
+    height: auto;
+    padding-bottom: 16px;
+    z-index: 10;
+  }
+  .cdp-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 12px 16px;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  .cdp-nav-item {
+    width: auto;
+    display: inline-flex;
+    white-space: nowrap;
+  }
+  .cdp-nav-item .cdp-nav-label {
+    flex: none;
+  }
+  .cdp-logout-btn {
+    margin: 16px 24px 0;
+    justify-content: center;
+  }
+  .cdp-main {
+    padding: 24px 16px;
+  }
+
+  /* Fix Find Your Style overflow */
+  .tab-bar {
+    overflow-x: auto;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+  .tab-btn {
+    flex-shrink: 0;
+  }
+  .products-scroll .product-card {
+    min-width: 240px;
+  }
+
+  /* Fix Hero title overlapping */
+  .hero-content {
+    padding-top: 100px;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  
+  /* Navbar */
+  .hide-on-mobile {
+    display: none !important;
+  }
+  .mobile-menu-btn {
+    display: flex;
+  }
+  .nav-links.mobile-open {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 80px;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    padding: 24px;
+    box-shadow: var(--shadow-md);
+    z-index: 998;
+    align-items: flex-start;
+  }
+  .nav-links {
+    display: none;
+  }
+  .nav-actions {
+    gap: 8px;
+  }
+  .mobile-only-links {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--cream-3);
+  }
+  .mobile-only-links a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 0;
+    color: var(--charcoal);
+  }
+}
+@media (min-width: 901px) {
+  .mobile-only-links {
+    display: none;
+  }
+}

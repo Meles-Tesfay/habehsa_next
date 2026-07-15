@@ -7,10 +7,10 @@ import { useShop } from '@/context/ShopContext';
 import {
   LogOut, Package, Heart, MapPin, Bell, User, Ruler, RotateCcw,
   Truck, Settings, ChevronRight, ShoppingBag, TrendingUp, Star,
-  Clock, CheckCircle2, AlertCircle, RefreshCw, ArrowLeft, Save
+  Clock, CheckCircle2, AlertCircle, RefreshCw
 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';   
 import ProductCard from '@/components/ProductCard';
 
 const STATUS_CONFIG = {
@@ -82,7 +82,7 @@ const CustomerDashboard = () => {
 
   useEffect(() => {
     if (user?.email) {
-      fetch(`/api/orders?t=${Date.now()}`, { headers: { 'Cache-Control': 'no-cache' } })
+      fetch('/api/orders')
         .then(res => res.json())
         .then(data => {
           setOrders(data.filter(order => order.customerEmail === user.email));
@@ -331,50 +331,6 @@ const CustomerDashboard = () => {
     </div>
   );
 
-  const renderSettings = () => (
-    <div className="cdp-panel animate-fade-up">
-      <div className="cdp-panel-header">
-        <div>
-          <h2>Profile Settings</h2>
-          <p className="cdp-panel-sub">Update your personal information and preferences.</p>
-        </div>
-      </div>
-      
-      <form className="cdp-settings-form" onSubmit={(e) => { e.preventDefault(); alert("Profile updated successfully!"); }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--charcoal)' }}>Full Name</label>
-            <input type="text" defaultValue={user?.name} style={{ padding: 12, borderRadius: 8, border: '1px solid var(--cream-3)', fontSize: 14 }} />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--charcoal)' }}>Email Address</label>
-            <input type="email" defaultValue={user?.email} style={{ padding: 12, borderRadius: 8, border: '1px solid var(--cream-3)', fontSize: 14 }} readOnly />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--charcoal)' }}>Phone Number (Optional)</label>
-            <input type="tel" placeholder="+251..." style={{ padding: 12, borderRadius: 8, border: '1px solid var(--cream-3)', fontSize: 14 }} />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--charcoal)' }}>Preferred Language</label>
-            <select style={{ padding: 12, borderRadius: 8, border: '1px solid var(--cream-3)', fontSize: 14, background: 'var(--white)' }}>
-              <option>English</option>
-              <option>Amharic</option>
-            </select>
-          </div>
-        </div>
-        
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 32 }}>
-          <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--charcoal)' }}>Default Shipping Address</label>
-          <textarea placeholder="123 Bole Road, Addis Ababa..." rows={3} style={{ padding: 12, borderRadius: 8, border: '1px solid var(--cream-3)', fontSize: 14, resize: 'vertical' }}></textarea>
-        </div>
-
-        <button type="submit" className="btn-primary btn-gold" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 24px', borderRadius: 99 }}>
-          <Save size={16} /> Save Changes
-        </button>
-      </form>
-    </div>
-  );
-
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':     return renderOverview();
@@ -382,7 +338,6 @@ const CustomerDashboard = () => {
       case 'tracking':     return renderTracking();
       case 'measurements': return renderMeasurements();
       case 'wishlist':     return renderWishlist();
-      case 'settings':     return renderSettings();
       default:             return renderDefault();
     }
   };
@@ -390,10 +345,6 @@ const CustomerDashboard = () => {
   return (
     <div className="cdp-root">
       <aside className="cdp-sidebar">
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--muted)', fontSize: 13, marginBottom: 24, textDecoration: 'none', fontWeight: 600, transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = 'var(--charcoal)'} onMouseLeave={(e) => e.currentTarget.style.color = 'var(--muted)'}>
-          <ArrowLeft size={14} /> Back to Store
-        </Link>
-
         <div className="cdp-user-block">
           <div className="cdp-avatar-wrap">
             <div className="cdp-avatar">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</div>
