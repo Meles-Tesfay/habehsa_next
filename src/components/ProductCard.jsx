@@ -2,8 +2,10 @@
 
 import React, { useState } from 'react';
 import { useShop } from '@/context/ShopContext';
+import { useAuth } from '@/context/AuthContext';
 import { Heart, ShoppingBag, Eye, Star } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { getImageUrl } from '@/utils/helpers';
 
 const BADGE_LABELS = {
@@ -13,17 +15,25 @@ const BADGE_LABELS = {
 };
 
 const ProductCard = ({ product, onQuickView }) => {
-  const { wishlist, toggleWishlist, addToCart } = useShop();
+  const router = useRouter();
+  const { user } = useAuth();
+  const { wishlist, toggleWishlist, addToCart, showToast } = useShop();
   const isWishlisted = wishlist.includes(product.id || product._id);
   const [selectedColor, setSelectedColor] = useState(0);
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
+    e.preventDefault();
+    if (!user) {
+      showToast("Please login to buy", "error");
+      router.push('/login');
+      return;
+    }
     addToCart(product);
   };
 
   return (
-    <div className="product-card">
+    <div className="product-card" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Link href={`/product/${product.id || product._id}`} className="product-img-wrap" style={{ display: 'block' }}>
         <img
           src={getImageUrl(product.image)}

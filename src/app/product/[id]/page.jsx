@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useShop } from '@/context/ShopContext';
+import { useAuth } from '@/context/AuthContext';
 import { ChevronRight, Star, Heart, ShoppingBag, Truck, Shield, RotateCcw, CheckCircle, Info } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import { getImageUrl } from '@/utils/helpers';
@@ -11,7 +12,9 @@ import { getImageUrl } from '@/utils/helpers';
 const ProductDetails = () => {
   const params = useParams();
   const id = params.id;
-  const { products, addToCart, wishlist, toggleWishlist, loading } = useShop();
+  const router = useRouter();
+  const { user } = useAuth();
+  const { products, addToCart, wishlist, toggleWishlist, loading, showToast } = useShop();
   
   const product = products.find(p => (p.id === Number(id) || p._id === id));
   
@@ -69,10 +72,20 @@ const ProductDetails = () => {
   };
 
   const handleAddToCart = () => {
+    if (!user) {
+      showToast("Please login to buy", "error");
+      router.push('/login');
+      return;
+    }
     addToCart({ ...product, quantity, selectedSize, selectedColor });
   };
 
   const handleBuyNow = () => {
+    if (!user) {
+      showToast("Please login to buy", "error");
+      router.push('/login');
+      return;
+    }
     if (product.status === 'out') return;
     setBuySuccess(true);
     setTimeout(() => {
