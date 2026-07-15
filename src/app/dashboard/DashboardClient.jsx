@@ -618,10 +618,15 @@ const DeleteConfirm = ({ product, onClose, onDeleted }) => {
   const doDelete = async () => {
     setDeleting(true);
     try {
-      await fetch(`${API}/api/products/${product._id}`, { method: "DELETE" });
+      const res = await fetch(`${API}/api/products/${product._id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || "Failed to delete product");
+      }
       onDeleted(product._id);
       onClose();
-    } catch {
+    } catch (err) {
+      alert(err.message);
       setDeleting(false);
     }
   };
