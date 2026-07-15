@@ -3,14 +3,16 @@ export const dynamic = 'force-dynamic';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useShop } from '@/context/ShopContext';
+import { useAuth } from '@/context/AuthContext';
 
 const Checkout = () => {
+  const { user } = useAuth();
   const { cart, cartTotal, placeOrder, showToast } = useShop();
   const router = useRouter();
   
   const [formData, setFormData] = useState({
-    customerName: '',
-    customerEmail: '',
+    customerName: user?.name || '',
+    customerEmail: user?.email || '',
     phone: '',
     address: ''
   });

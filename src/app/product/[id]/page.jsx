@@ -22,6 +22,7 @@ const ProductDetails = () => {
   const [activeTab, setActiveTab] = useState('details');
   const [isZoomed, setIsZoomed] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [buySuccess, setBuySuccess] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -69,6 +70,15 @@ const ProductDetails = () => {
 
   const handleAddToCart = () => {
     addToCart({ ...product, quantity, selectedSize, selectedColor });
+  };
+
+  const handleBuyNow = () => {
+    if (product.status === 'out') return;
+    setBuySuccess(true);
+    setTimeout(() => {
+      setBuySuccess(false);
+      handleAddToCart();
+    }, 2000);
   };
 
   const related = products.filter(p => 
@@ -245,7 +255,7 @@ const ProductDetails = () => {
             )}
           </div>
 
-          <div className="pd-actions">
+          <div className="pd-actions" style={{ flexWrap: 'wrap' }}>
             <div className="pd-qty-selector">
               <button onClick={() => setQuantity(Math.max(1, quantity - 1))}>-</button>
               <input type="number" value={quantity} readOnly />
@@ -256,6 +266,7 @@ const ProductDetails = () => {
               className="btn-primary btn-gold pd-add-btn" 
               onClick={handleAddToCart}
               disabled={product.status === 'out'}
+              style={{ flex: '0 1 auto', padding: '0 32px' }}
             >
               <ShoppingBag size={18} /> 
               {product.status === 'out' ? 'Sold Out' : 'Add to Cart'}
@@ -270,8 +281,26 @@ const ProductDetails = () => {
             </button>
           </div>
           
-          <button className="btn-primary pd-buy-now" disabled={product.status === 'out'}>
-            Buy it now
+          <button 
+            className="btn-primary pd-buy-now" 
+            disabled={product.status === 'out' || buySuccess}
+            onClick={handleBuyNow}
+            style={{ 
+              width: 'max-content', 
+              padding: '14px 48px', 
+              transition: 'all 0.3s ease',
+              backgroundColor: buySuccess ? 'var(--gold)' : 'var(--charcoal)',
+              color: buySuccess ? '#fff' : 'var(--white)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            {buySuccess ? (
+              <><CheckCircle size={18} /> Successfully Purchased!</>
+            ) : (
+              'Buy it now'
+            )}
           </button>
 
           <div className="pd-category-info">

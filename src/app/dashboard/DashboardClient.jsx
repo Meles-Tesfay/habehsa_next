@@ -43,7 +43,9 @@ import { ORDERS, REVENUE_DATA, AI_RESPONSES } from "@/data";
 import Link from "next/link";
 import { useShop } from "@/context/ShopContext";
 import { getImageUrl } from "@/utils/helpers";
-
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+import { LogOut } from "lucide-react";
 const API = "";
 
 const StatusBadge = ({ status }) => {
@@ -258,7 +260,7 @@ const ProductFormModal = ({ product, onClose, onSaved }) => {
       stock: Number(form.stock),
     };
     try {
-      const url = isEdit ? `${API}/products/${product._id}` : `${API}/products`;
+      const url = isEdit ? `${API}/api/products/${product._id}` : `${API}/api/products`;
       const method = isEdit ? "PUT" : "POST";
       const res = await fetch(url, {
         method,
@@ -616,7 +618,7 @@ const DeleteConfirm = ({ product, onClose, onDeleted }) => {
   const doDelete = async () => {
     setDeleting(true);
     try {
-      await fetch(`${API}/products/${product._id}`, { method: "DELETE" });
+      await fetch(`${API}/api/products/${product._id}`, { method: "DELETE" });
       onDeleted(product._id);
       onClose();
     } catch {
@@ -658,14 +660,19 @@ const DeleteConfirm = ({ product, onClose, onDeleted }) => {
    MAIN DASHBOARD
 ──────────────────────────────────────────────── */
 const Dashboard = () => {
+  const { user, logout } = useAuth();
   const { products: ctxProducts, refreshProducts, showToast } = useShop();
+  const router = useRouter();
 
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
 
   const fetchOrders = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/api/orders`, { cache: 'no-store' });
+      const res = await fetch(`${API}/api/orders?t=${Date.now()}`, { 
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' }
+      });
       if (res.ok) {
         const data = await res.json();
         setOrders(data);
@@ -813,7 +820,7 @@ const Dashboard = () => {
       {/* ── SIDEBAR ── */}
       <aside className="dash-sidebar" aria-label="Sidebar navigation">
         <div className="sidebar-brand">
-          <Link to="/" className="sidebar-brand-logo">
+          <Link href="/" className="sidebar-brand-logo">
             Habesha <em>Heritage</em>
           </Link>
           <div className="sidebar-brand-badge">
@@ -884,11 +891,13 @@ const Dashboard = () => {
         </nav>
 
         <div className="sidebar-footer">
-          <div className="sidebar-user">
-            <div className="sidebar-avatar">TH</div>
+          <div className="sidebar-user" onClick={() => { logout(); router.push('/login'); }}>
+            <div className="sidebar-avatar">{user?.name?.charAt(0)?.toUpperCase() || 'S'}</div>
             <div>
-              <div className="sidebar-user-name">Tigist Haile</div>
-              <div className="sidebar-user-role">Verified Artisan Seller</div>
+              <div className="sidebar-user-name">{user?.name || 'Seller'}</div>
+              <div className="sidebar-user-role" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <LogOut size={12} /> Logout
+              </div>
             </div>
           </div>
         </div>
@@ -913,7 +922,7 @@ const Dashboard = () => {
               <Bell size={17} />
               <span className="topbar-notif-dot" />
             </button>
-            <Link to="/" style={{ display: "flex" }}>
+            <Link href="/" style={{ display: "flex" }}>
               <button className="topbar-btn" aria-label="View store">
                 <ArrowUpRight size={17} />
               </button>

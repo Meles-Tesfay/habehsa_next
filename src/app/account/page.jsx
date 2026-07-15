@@ -1,178 +1,450 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useShop } from '@/context/ShopContext';
-import { LogOut, Package, Heart, MapPin, Bell, User, Ruler, RotateCcw, Truck, Settings } from 'lucide-react';
+import {
+  LogOut, Package, Heart, MapPin, Bell, User, Ruler, RotateCcw,
+  Truck, Settings, ChevronRight, ShoppingBag, TrendingUp, Star,
+  Clock, CheckCircle2, AlertCircle, RefreshCw, ArrowLeft, Save
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import ProductCard from '@/components/ProductCard';
+
+const STATUS_CONFIG = {
+  delivered:  { label: 'Delivered',  color: '#16a34a', bg: 'rgba(22,163,74,0.08)',  Icon: CheckCircle2 },
+  shipped:    { label: 'Shipped',    color: '#1d4ed8', bg: 'rgba(29,78,216,0.08)',  Icon: Truck        },
+  processing: { label: 'Processing', color: '#b45309', bg: 'rgba(180,83,9,0.08)',   Icon: RefreshCw    },
+  pending:    { label: 'Pending',    color: '#dc2626', bg: 'rgba(220,38,38,0.08)',  Icon: Clock        },
+};
+
+const StatusPill = ({ status }) => {
+  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
+  const Icon = cfg.Icon;
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 6,
+      padding: '5px 14px', borderRadius: 99, fontSize: 12, fontWeight: 700,
+      color: cfg.color, background: cfg.bg, letterSpacing: '0.02em'
+    }}>
+      <Icon size={12} /> {cfg.label}
+    </span>
+  );
+};
+
+const OrderCard = ({ order }) => (
+  <div className="cdp-order-card">
+    <div className="cdp-order-head">
+      <div>
+        <span className="cdp-order-id">{order.orderId}</span>
+        <span className="cdp-order-date">
+          {new Date(order.createdAt || Date.now()).toLocaleDateString('en-US', {
+            month: 'short', day: 'numeric', year: 'numeric'
+          })}
+        </span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <span className="cdp-order-amount">${(order.amount || 0).toFixed(2)}</span>
+        <StatusPill status={order.status} />
+      </div>
+    </div>
+    {order.items && order.items.length > 0 && (
+      <div className="cdp-order-items-row">
+        {order.items.slice(0, 3).map((item, idx) => (
+          <div key={idx} className="cdp-order-item">
+            <img
+              src={item.image ? (item.image.startsWith('http') ? item.image : `/assets/${item.image}`) : '/assets/hero_model.png'}
+              alt={item.name}
+            />
+            <div className="cdp-order-item-info">
+              <div className="cdp-order-item-name">{item.name}</div>
+              <div className="cdp-order-item-meta">Qty {item.quantity} &middot; ${item.price?.toFixed(2)}</div>
+            </div>
+          </div>
+        ))}
+        {order.items.length > 3 && (
+          <div className="cdp-order-more">+{order.items.length - 3} more</div>
+        )}
+      </div>
+    )}
+  </div>
+);
 
 const CustomerDashboard = () => {
   const { user, logout } = useAuth();
-  const { products } = useShop(); // For wishlist hydration
-  const [activeTab, setActiveTab] = useState('orders');
+  const { products, wishlist } = useShop();
+  const [activeTab, setActiveTab] = useState('overview');
+  const [orders, setOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(true);
   const router = useRouter();
 
+  useEffect(() => {
+    if (user?.email) {
+      fetch(`/api/orders?t=${Date.now()}`, { headers: { 'Cache-Control': 'no-cache' } })
+        .then(res => res.json())
+        .then(data => {
+          setOrders(data.filter(order => order.customerEmail === user.email));
+          setLoadingOrders(false);
+        })
+        .catch(() => setLoadingOrders(false));
+    } else {
+      setLoadingOrders(false);
+    }
+  }, [user]);
+
+  const wishlistItems = products.filter(p => wishlist.includes(p.id) || wishlist.includes(p._id));
+  const activeOrder = orders.find(o => o.status !== 'delivered');
+  const totalSpent = orders.reduce((sum, o) => sum + (o.amount || 0), 0);
+
   const tabs = [
-    { id: 'orders', label: 'My Orders', icon: Package },
-    { id: 'tracking', label: 'Order Tracking', icon: Truck },
-    { id: 'wishlist', label: 'Wishlist', icon: Heart },
-    { id: 'measurements', label: 'Saved Measurements', icon: Ruler },
-    { id: 'addresses', label: 'Saved Addresses', icon: MapPin },
-    { id: 'returns', label: 'Returns', icon: RotateCcw },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'settings', label: 'Profile Settings', icon: User },
-    { id: 'account', label: 'Account Management', icon: Settings },
+    { id: 'overview',      label: 'Overview',          icon: TrendingUp },
+    { id: 'orders',        label: 'My Orders',          icon: Package    },
+    { id: 'tracking',      label: 'Order Tracking',     icon: Truck      },
+    { id: 'wishlist',      label: 'Wishlist',           icon: Heart,  badge: wishlistItems.length },
+    { id: 'measurements',  label: 'Measurements',       icon: Ruler      },
+    { id: 'addresses',     label: 'Saved Addresses',    icon: MapPin     },
+    { id: 'returns',       label: 'Returns & Refunds',  icon: RotateCcw  },
+    { id: 'notifications', label: 'Notifications',      icon: Bell       },
+    { id: 'settings',      label: 'Profile Settings',   icon: User       },
   ];
 
-  const handleLogout = () => {
-    logout();
-    router.push('/login');
+  const handleLogout = () => { logout(); router.push('/login'); };
+
+  const renderOverview = () => (
+    <div className="cdp-panel animate-fade-up">
+      <div className="cdp-panel-header">
+        <div>
+          <h2>Welcome back, {user?.name?.split(' ')[0] || 'Customer'}</h2>
+          <p className="cdp-panel-sub">Here&apos;s an overview of your account activity.</p>
+        </div>
+      </div>
+
+      <div className="cdp-stats-grid">
+        <div className="cdp-stat-card gold">
+          <div className="cdp-stat-icon"><ShoppingBag size={20} /></div>
+          <div className="cdp-stat-value">{orders.length}</div>
+          <div className="cdp-stat-label">Total Orders</div>
+        </div>
+        <div className="cdp-stat-card">
+          <div className="cdp-stat-icon green"><Heart size={20} /></div>
+          <div className="cdp-stat-value">{wishlistItems.length}</div>
+          <div className="cdp-stat-label">Saved Items</div>
+        </div>
+        <div className="cdp-stat-card">
+          <div className="cdp-stat-icon blue"><TrendingUp size={20} /></div>
+          <div className="cdp-stat-value">${totalSpent.toFixed(0)}</div>
+          <div className="cdp-stat-label">Total Spent</div>
+        </div>
+        <div className="cdp-stat-card">
+          <div className="cdp-stat-icon purple"><Star size={20} /></div>
+          <div className="cdp-stat-value">{activeOrder ? 1 : 0}</div>
+          <div className="cdp-stat-label">Active Orders</div>
+        </div>
+      </div>
+
+      <div className="cdp-section-header">
+        <h3>Recent Orders</h3>
+        <button className="cdp-link-btn" onClick={() => setActiveTab('orders')}>View All <ChevronRight size={14} /></button>
+      </div>
+
+      {loadingOrders ? (
+        <div className="cdp-loading"><div className="cdp-spinner" /><span>Loading orders&hellip;</span></div>
+      ) : orders.length === 0 ? (
+        <div className="cdp-empty-state">
+          <Package size={40} strokeWidth={1.5} />
+          <h4>No orders yet</h4>
+          <p>When you place your first order, it will appear here.</p>
+          <Link href="/" className="cdp-cta-btn">Shop Now</Link>
+        </div>
+      ) : (
+        <div className="cdp-order-list">
+          {orders.slice(0, 3).map(order => <OrderCard key={order._id} order={order} />)}
+        </div>
+      )}
+
+      {wishlistItems.length > 0 && (
+        <>
+          <div className="cdp-section-header" style={{ marginTop: 40 }}>
+            <h3>Saved Items</h3>
+            <button className="cdp-link-btn" onClick={() => setActiveTab('wishlist')}>View All <ChevronRight size={14} /></button>
+          </div>
+          <div className="cdp-wishlist-preview">
+            {wishlistItems.slice(0, 4).map(item => (
+              <Link key={item.id || item._id} href={`/product/${item.id || item._id}`} className="cdp-wishlist-thumb">
+                <img src={item.image || '/assets/hero_model.png'} alt={item.name} />
+                <div className="cdp-wishlist-thumb-info">
+                  <span>{item.name}</span>
+                  <strong>${item.price}</strong>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+
+  const renderOrders = () => (
+    <div className="cdp-panel animate-fade-up">
+      <div className="cdp-panel-header">
+        <div>
+          <h2>Order History</h2>
+          <p className="cdp-panel-sub">{orders.length} order{orders.length !== 1 ? 's' : ''} placed</p>
+        </div>
+      </div>
+      {loadingOrders ? (
+        <div className="cdp-loading"><div className="cdp-spinner" /><span>Loading orders&hellip;</span></div>
+      ) : orders.length === 0 ? (
+        <div className="cdp-empty-state">
+          <Package size={40} strokeWidth={1.5} />
+          <h4>No orders yet</h4>
+          <p>Start shopping and your orders will appear here.</p>
+          <Link href="/" className="cdp-cta-btn">Explore Collection</Link>
+        </div>
+      ) : (
+        <div className="cdp-order-list">
+          {orders.map(order => <OrderCard key={order._id} order={order} />)}
+        </div>
+      )}
+    </div>
+  );
+
+  const renderTracking = () => {
+    if (loadingOrders) return (
+      <div className="cdp-panel animate-fade-up">
+        <div className="cdp-loading"><div className="cdp-spinner" /><span>Loading tracking info&hellip;</span></div>
+      </div>
+    );
+    if (!activeOrder) return (
+      <div className="cdp-panel animate-fade-up">
+        <div className="cdp-panel-header"><h2>Order Tracking</h2></div>
+        <div className="cdp-empty-state">
+          <Truck size={40} strokeWidth={1.5} />
+          <h4>No active orders</h4>
+          <p>You have no orders currently in transit.</p>
+        </div>
+      </div>
+    );
+
+    const steps = [
+      { label: 'Order Confirmed',  desc: 'Payment verified successfully',   done: true },
+      { label: 'Being Prepared',   desc: 'Artisans are crafting your item', done: ['processing','shipped','delivered'].includes(activeOrder.status) },
+      { label: 'Quality Check',    desc: 'Final inspection complete',        done: ['shipped','delivered'].includes(activeOrder.status) },
+      { label: 'Out for Delivery', desc: 'Shipped via DHL Express',          done: ['shipped','delivered'].includes(activeOrder.status) },
+      { label: 'Delivered',        desc: 'Package received',                 done: activeOrder.status === 'delivered' },
+    ];
+
+    return (
+      <div className="cdp-panel animate-fade-up">
+        <div className="cdp-panel-header">
+          <div>
+            <h2>Track Your Order</h2>
+            <p className="cdp-panel-sub">Tracking: <strong>{activeOrder.orderId}</strong></p>
+          </div>
+          <StatusPill status={activeOrder.status} />
+        </div>
+        <div className="cdp-track-card">
+          {steps.map((step, i) => (
+            <div key={i} className={`cdp-track-step${step.done ? ' done' : ''}${i < steps.length - 1 ? ' has-line' : ''}`}>
+              <div className="cdp-track-icon">
+                {step.done ? <CheckCircle2 size={14} /> : <span>{i + 1}</span>}
+              </div>
+              <div className="cdp-track-body">
+                <div className="cdp-track-title">{step.label}</div>
+                <div className="cdp-track-desc">{step.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   };
+
+  const renderMeasurements = () => (
+    <div className="cdp-panel animate-fade-up">
+      <div className="cdp-panel-header">
+        <div>
+          <h2>Saved Measurements</h2>
+          <p className="cdp-panel-sub">Your tailoring profile for bespoke orders.</p>
+        </div>
+      </div>
+      <div className="cdp-form-card">
+        <form onSubmit={e => e.preventDefault()}>
+          <div className="cdp-grid-2">
+            {[
+              { label: 'Bust (in)', name: 'bust', defaultValue: 34 },
+              { label: 'Waist (in)', name: 'waist', defaultValue: 28 },
+              { label: 'Hips (in)', name: 'hips', defaultValue: 38 },
+              { label: 'Dress Length (in)', name: 'length', defaultValue: 56 },
+              { label: 'Shoulder Width (in)', name: 'shoulder', defaultValue: 15 },
+              { label: 'Sleeve Length (in)', name: 'sleeve', defaultValue: 22 },
+            ].map(f => (
+              <div key={f.name} className="cdp-field">
+                <label>{f.label}</label>
+                <input type="number" defaultValue={f.defaultValue} />
+              </div>
+            ))}
+          </div>
+          <button type="submit" className="cdp-save-btn">Save Measurements</button>
+        </form>
+      </div>
+    </div>
+  );
+
+  const renderWishlist = () => (
+    <div className="cdp-panel animate-fade-up">
+      <div className="cdp-panel-header">
+        <div>
+          <h2>My Wishlist</h2>
+          <p className="cdp-panel-sub">{wishlistItems.length} saved item{wishlistItems.length !== 1 ? 's' : ''}</p>
+        </div>
+      </div>
+      {wishlistItems.length === 0 ? (
+        <div className="cdp-empty-state">
+          <Heart size={40} strokeWidth={1.5} />
+          <h4>Your wishlist is empty</h4>
+          <p>Save items you love and find them here later.</p>
+          <Link href="/" className="cdp-cta-btn">Explore Collection</Link>
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 24 }}>
+          {wishlistItems.map(item => (
+            <ProductCard key={item.id || item._id} product={item} onQuickView={() => {}} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const renderDefault = () => (
+    <div className="cdp-panel animate-fade-up">
+      <div className="cdp-panel-header">
+        <h2>{tabs.find(t => t.id === activeTab)?.label}</h2>
+      </div>
+      <div className="cdp-empty-state">
+        <AlertCircle size={40} strokeWidth={1.5} />
+        <h4>Coming Soon</h4>
+        <p>This section is being built. Check back soon!</p>
+      </div>
+    </div>
+  );
+
+  const renderSettings = () => (
+    <div className="cdp-panel animate-fade-up">
+      <div className="cdp-panel-header">
+        <div>
+          <h2>Profile Settings</h2>
+          <p className="cdp-panel-sub">Update your personal information and preferences.</p>
+        </div>
+      </div>
+      
+      <form className="cdp-settings-form" onSubmit={(e) => { e.preventDefault(); alert("Profile updated successfully!"); }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--charcoal)' }}>Full Name</label>
+            <input type="text" defaultValue={user?.name} style={{ padding: 12, borderRadius: 8, border: '1px solid var(--cream-3)', fontSize: 14 }} />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--charcoal)' }}>Email Address</label>
+            <input type="email" defaultValue={user?.email} style={{ padding: 12, borderRadius: 8, border: '1px solid var(--cream-3)', fontSize: 14 }} readOnly />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--charcoal)' }}>Phone Number (Optional)</label>
+            <input type="tel" placeholder="+251..." style={{ padding: 12, borderRadius: 8, border: '1px solid var(--cream-3)', fontSize: 14 }} />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--charcoal)' }}>Preferred Language</label>
+            <select style={{ padding: 12, borderRadius: 8, border: '1px solid var(--cream-3)', fontSize: 14, background: 'var(--white)' }}>
+              <option>English</option>
+              <option>Amharic</option>
+            </select>
+          </div>
+        </div>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 32 }}>
+          <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--charcoal)' }}>Default Shipping Address</label>
+          <textarea placeholder="123 Bole Road, Addis Ababa..." rows={3} style={{ padding: 12, borderRadius: 8, border: '1px solid var(--cream-3)', fontSize: 14, resize: 'vertical' }}></textarea>
+        </div>
+
+        <button type="submit" className="btn-primary btn-gold" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 24px', borderRadius: 99 }}>
+          <Save size={16} /> Save Changes
+        </button>
+      </form>
+    </div>
+  );
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'orders':
-        return (
-          <div className="cd-panel animate-fade-up">
-            <h2>Order History</h2>
-            <div className="cd-order-list">
-              <div className="cd-order-card">
-                <div className="cd-order-header">
-                  <div>
-                    <span className="cd-order-id">Order #HH-98234</span>
-                    <span className="cd-order-date">Placed on Oct 12, 2026</span>
-                  </div>
-                  <span className="status-badge badge-delivered">Delivered</span>
-                </div>
-                <div className="cd-order-items">
-                  <img src="/assets/hero_model.png" alt="Kemis" />
-                  <div>
-                    <h4>Premium Gold Tilet Habesha Kemis</h4>
-                    <p>Size: Custom | Qty: 1</p>
-                    <p className="cd-order-price">$189.00</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      case 'tracking':
-        return (
-          <div className="cd-panel animate-fade-up">
-            <h2>Track Active Order</h2>
-            <p className="cd-subtitle">Tracking Order #HH-99120</p>
-            <div className="cd-timeline">
-              <div className="cd-timeline-step active">
-                <div className="cd-timeline-icon"><CheckCircle size={16} /></div>
-                <div className="cd-timeline-content">
-                  <h4>Order Confirmed</h4>
-                  <p>Oct 18, 2026 - 10:30 AM</p>
-                </div>
-              </div>
-              <div className="cd-timeline-step active">
-                <div className="cd-timeline-icon"><CheckCircle size={16} /></div>
-                <div className="cd-timeline-content">
-                  <h4>Artisan Weaving Started</h4>
-                  <p>Oct 19, 2026 - Addis Ababa Workshop</p>
-                </div>
-              </div>
-              <div className="cd-timeline-step pending">
-                <div className="cd-timeline-icon"><div className="cd-dot" /></div>
-                <div className="cd-timeline-content">
-                  <h4>Quality Check & Finishing</h4>
-                  <p>Estimated: Oct 24, 2026</p>
-                </div>
-              </div>
-              <div className="cd-timeline-step pending">
-                <div className="cd-timeline-icon"><Truck size={16} /></div>
-                <div className="cd-timeline-content">
-                  <h4>Shipped</h4>
-                  <p>Awaiting dispatch via DHL</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      case 'measurements':
-        return (
-          <div className="cd-panel animate-fade-up">
-            <h2>Saved Measurements</h2>
-            <p className="cd-subtitle">Your custom tailoring profile for bespoke orders.</p>
-            <form className="cd-form" onSubmit={e => e.preventDefault()}>
-              <div className="cd-grid-2">
-                <div className="cd-field">
-                  <label>Bust (inches)</label>
-                  <input type="number" defaultValue={34} />
-                </div>
-                <div className="cd-field">
-                  <label>Waist (inches)</label>
-                  <input type="number" defaultValue={28} />
-                </div>
-                <div className="cd-field">
-                  <label>Hips (inches)</label>
-                  <input type="number" defaultValue={38} />
-                </div>
-                <div className="cd-field">
-                  <label>Dress Length (inches)</label>
-                  <input type="number" defaultValue={56} />
-                </div>
-              </div>
-              <button className="btn-primary btn-gold" style={{ marginTop: 24 }}>Save Measurements</button>
-            </form>
-          </div>
-        );
-      default:
-        return (
-          <div className="cd-panel animate-fade-up">
-            <h2>{tabs.find(t => t.id === activeTab)?.label}</h2>
-            <p className="cd-placeholder">This section is currently under construction. Check back soon for updates!</p>
-          </div>
-        );
+      case 'overview':     return renderOverview();
+      case 'orders':       return renderOrders();
+      case 'tracking':     return renderTracking();
+      case 'measurements': return renderMeasurements();
+      case 'wishlist':     return renderWishlist();
+      case 'settings':     return renderSettings();
+      default:             return renderDefault();
     }
   };
 
   return (
-    <div className="customer-dashboard">
-      <div className="cd-sidebar">
-        <div className="cd-user-info">
-          <div className="cd-avatar">{user?.name?.charAt(0) || 'C'}</div>
-          <div>
-            <h3>{user?.name || 'Customer'}</h3>
-            <p>{user?.email}</p>
+    <div className="cdp-root">
+      <aside className="cdp-sidebar">
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--muted)', fontSize: 13, marginBottom: 24, textDecoration: 'none', fontWeight: 600, transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = 'var(--charcoal)'} onMouseLeave={(e) => e.currentTarget.style.color = 'var(--muted)'}>
+          <ArrowLeft size={14} /> Back to Store
+        </Link>
+
+        <div className="cdp-user-block">
+          <div className="cdp-avatar-wrap">
+            <div className="cdp-avatar">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</div>
+          </div>
+          <h3 className="cdp-username">{user?.name || 'Guest'}</h3>
+          <p className="cdp-useremail">{user?.email}</p>
+          <div className="cdp-member-badge"><Star size={11} /> Premium Member</div>
+        </div>
+
+        <div className="cdp-sidebar-stats">
+          <div className="cdp-sidebar-stat">
+            <span>{orders.length}</span>
+            <label>Orders</label>
+          </div>
+          <div className="cdp-sidebar-stat-divider" />
+          <div className="cdp-sidebar-stat">
+            <span>{wishlistItems.length}</span>
+            <label>Wishlist</label>
+          </div>
+          <div className="cdp-sidebar-stat-divider" />
+          <div className="cdp-sidebar-stat">
+            <span>${totalSpent.toFixed(0)}</span>
+            <label>Spent</label>
           </div>
         </div>
-        
-        <nav className="cd-nav">
-          {tabs.map(({ id, label, icon: Icon }) => (
-            <button 
+
+        <nav className="cdp-nav">
+          {tabs.map(({ id, label, icon: Icon, badge }) => (
+            <button
               key={id}
-              className={`cd-nav-item ${activeTab === id ? 'active' : ''}`}
+              className={`cdp-nav-item${activeTab === id ? ' active' : ''}`}
               onClick={() => setActiveTab(id)}
             >
-              <Icon size={18} /> {label}
+              <span className="cdp-nav-icon"><Icon size={17} /></span>
+              <span className="cdp-nav-label">{label}</span>
+              {badge > 0 && <span className="cdp-nav-badge">{badge}</span>}
+              {activeTab === id && <ChevronRight size={14} className="cdp-nav-arrow" />}
             </button>
           ))}
         </nav>
 
-        <button className="cd-logout" onClick={handleLogout}>
-          <LogOut size={18} /> Logout
+        <button className="cdp-logout-btn" onClick={handleLogout}>
+          <LogOut size={16} /> Sign Out
         </button>
-      </div>
-      
-      <div className="cd-content-area">
+      </aside>
+
+      <main className="cdp-main">
         {renderContent()}
-      </div>
+      </main>
     </div>
   );
 };
-
-const CheckCircle = ({ size }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-    <polyline points="22 4 12 14.01 9 11.01" />
-  </svg>
-);
 
 export default CustomerDashboard;

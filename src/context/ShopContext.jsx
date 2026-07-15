@@ -21,13 +21,17 @@ export const ShopProvider = ({ children }) => {
 
   const fetchProducts = useCallback(() => {
     setLoading(true);
-    fetch('/api/products', { cache: 'no-store' })
+    fetch(`/api/products?t=${Date.now()}`, { 
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' }
+    })
       .then((res) => {
         if (!res.ok) throw new Error('Network response was not ok');
         return res.json();
       })
       .then((data) => {
-        setProducts(data.length > 0 ? data : FALLBACK_PRODUCTS);
+        // Only use fallback if it's not an array. If db is empty, allow empty array.
+        setProducts(Array.isArray(data) ? data : FALLBACK_PRODUCTS);
         setLoading(false);
       })
       .catch((err) => {
