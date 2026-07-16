@@ -3307,7 +3307,7 @@ tbody tr:hover { background: rgba(0,0,0,.015); }
     display: none; /* hidden on mobile — use .mobile-dash-drawer instead */
   }
   .topbar-hamburger {
-    display: flex;
+    display: flex !important;
   }
   .dash-content {
     padding: 20px 16px;
