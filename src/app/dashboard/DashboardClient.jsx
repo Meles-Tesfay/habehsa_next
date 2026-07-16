@@ -671,6 +671,21 @@ const Dashboard = () => {
 
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
+  const [page, setPage] = useState("overview");
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [searchOrder, setSearchOrder] = useState("");
+  const [invSearch, setInvSearch] = useState("");
+  const [invStatus, setInvStatus] = useState("all");
+  const [invGender, setInvGender] = useState("all");
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [period, setPeriod] = useState("week");
+  const [addOpen, setAddOpen] = useState(false);
+  const [editProduct, setEditProduct] = useState(null);
+  const [deleteProduct, setDeleteProduct] = useState(null);
+  const [saveSuccess, setSaveSuccess] = useState("");
+
+  // Live inventory from backend (via ShopContext)
+  const inventory = ctxProducts;
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -706,24 +721,7 @@ const Dashboard = () => {
   const pendingOrdersCount = orders.filter(o => o.status === "pending").length;
   const NAV = getNavItems(pendingOrdersCount);
 
-  const [page, setPage] = useState("overview");
-  const [searchOrder, setSearchOrder] = useState("");
-  const [invSearch, setInvSearch] = useState("");
-  const [invStatus, setInvStatus] = useState("all");
-  const [invGender, setInvGender] = useState("all");
-  const [notifOpen, setNotifOpen] = useState(false);
-  const [period, setPeriod] = useState("week");
 
-  // CRUD modal state
-  const [addOpen, setAddOpen] = useState(false);
-  const [editProduct, setEditProduct] = useState(null);
-  const [deleteProduct, setDeleteProduct] = useState(null);
-  const [saveSuccess, setSaveSuccess] = useState("");
-
-  // Live inventory from backend (via ShopContext)
-  const inventory = ctxProducts;
-
-  // AI
   const [aiMsgs, setAiMsgs] = useState([
     {
       role: "bot",
@@ -830,7 +828,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* ── SIDEBAR ── */}
+      {/* ── SIDEBAR (desktop) ── */}
       <aside className="dash-sidebar" aria-label="Sidebar navigation">
         <div className="sidebar-brand">
           <Link href="/" className="sidebar-brand-logo">
@@ -916,10 +914,82 @@ const Dashboard = () => {
         </div>
       </aside>
 
+      {/* ── MOBILE NAV DRAWER ── */}
+      {mobileNavOpen && (
+        <div
+          className="mobile-dash-overlay"
+          onClick={() => setMobileNavOpen(false)}
+          aria-label="Close navigation"
+        />
+      )}
+      <aside className={`mobile-dash-drawer ${mobileNavOpen ? 'open' : ''}`} aria-label="Mobile navigation">
+        <div className="mobile-dash-drawer-header">
+          <Link href="/" className="sidebar-brand-logo" onClick={() => setMobileNavOpen(false)}>
+            Habesha <em>Heritage</em>
+          </Link>
+          <button className="mobile-dash-close" onClick={() => setMobileNavOpen(false)} aria-label="Close">
+            <X size={20} />
+          </button>
+        </div>
+        <nav style={{ padding: '8px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
+          <div className="nav-group-label">Main</div>
+          {NAV.slice(0, 2).map(({ key, label, icon: Icon, badge }) => (
+            <button key={key} className={`dash-nav-btn ${page === key ? 'active' : ''}`}
+              onClick={() => { setPage(key); setMobileNavOpen(false); }}>
+              <Icon size={16} />{label}
+              {badge && <span className="nav-pill">{badge}</span>}
+            </button>
+          ))}
+          <div className="nav-group-label">Products</div>
+          {NAV.slice(2, 4).map(({ key, label, icon: Icon, badge }) => (
+            <button key={key} className={`dash-nav-btn ${page === key ? 'active' : ''}`}
+              onClick={() => { setPage(key); setMobileNavOpen(false); }}>
+              <Icon size={16} />{label}
+              {badge && <span className="nav-pill">{badge}</span>}
+            </button>
+          ))}
+          <div className="nav-group-label">Fulfillment</div>
+          {NAV.slice(4, 6).map(({ key, label, icon: Icon }) => (
+            <button key={key} className={`dash-nav-btn ${page === key ? 'active' : ''}`}
+              onClick={() => { setPage(key); setMobileNavOpen(false); }}>
+              <Icon size={16} />{label}
+            </button>
+          ))}
+          <div className="nav-group-label">Growth</div>
+          {NAV.slice(6).map(({ key, label, icon: Icon }) => (
+            <button key={key} className={`dash-nav-btn ${page === key ? 'active' : ''}`}
+              onClick={() => { setPage(key); setMobileNavOpen(false); }}>
+              <Icon size={16} />{label}
+            </button>
+          ))}
+        </nav>
+        <div style={{ padding: '16px 12px', borderTop: '1px solid rgba(255,255,255,.08)' }}>
+          <button
+            className="dash-nav-btn"
+            style={{ color: '#ff6b6b', width: '100%' }}
+            onClick={() => { logout(); router.push('/login'); }}
+          >
+            <LogOut size={16} /> Sign Out
+          </button>
+        </div>
+      </aside>
+
       {/* ── MAIN ── */}
       <div className="dash-main">
         {/* Topbar */}
         <div className="dash-topbar">
+          {/* Hamburger — mobile only */}
+          <button
+            className="topbar-hamburger"
+            onClick={() => setMobileNavOpen(true)}
+            aria-label="Open navigation"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
           <span className="topbar-title">{pageTitle}</span>
           <div className="topbar-right">
             <button className="topbar-btn" aria-label="Search">

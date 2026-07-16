@@ -3297,44 +3297,35 @@ tbody tr:hover { background: rgba(0,0,0,.015); }
     grid-template-columns: 1fr;
   }
   
-  /* Fix Admin Dashboard layout */
+  /* Fix Admin Dashboard layout — sidebar hidden on mobile, drawer used instead */
   .dash-layout {
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
   }
   .dash-sidebar {
-    width: 100%;
-    height: auto;
-    flex-direction: row;
-    overflow-x: auto;
-    padding: 12px 16px;
-    align-items: center;
-    -webkit-overflow-scrolling: touch;
+    display: none; /* hidden on mobile — use .mobile-dash-drawer instead */
   }
-  .sidebar-brand { display: none; }
-  .dash-sidebar nav {
-    flex-direction: row;
-    align-items: center;
-    padding: 0;
-    gap: 8px;
-    flex: none;
+  .topbar-hamburger {
+    display: flex;
   }
-  .nav-group-label { display: none; }
-  .dash-nav-btn {
-    width: auto;
-    white-space: nowrap;
-    padding: 8px 12px;
+  .dash-content {
+    padding: 20px 16px;
   }
-  .sidebar-footer {
-    padding: 0;
-    border: none;
-    margin-left: 8px;
-    border-left: 1px solid rgba(255,255,255,.2);
-    padding-left: 16px;
+  .kpi-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
   }
-  .sidebar-user { padding: 4px 8px; }
-  .sidebar-user-name { display: none; }
+  .kpi-value {
+    font-size: 22px;
+  }
+  .chart-row {
+    grid-template-columns: 1fr;
+  }
+  .dash-topbar {
+    padding: 0 16px;
+  }
+  .topbar-add-btn span { display: none; }
   .cdp-logout-btn {
     margin: 16px 24px 0;
     justify-content: center;
@@ -3411,4 +3402,83 @@ tbody tr:hover { background: rgba(0,0,0,.015); }
   .mobile-only-links {
     display: none;
   }
+  /* Hide mobile dashboard drawer on desktop */
+  .mobile-dash-drawer,
+  .mobile-dash-overlay {
+    display: none !important;
+  }
+  .topbar-hamburger {
+    display: none !important;
+  }
 }
+
+/* ================================================================
+   MOBILE DASHBOARD DRAWER
+   ================================================================ */
+.topbar-hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--charcoal);
+  border-radius: var(--radius-sm);
+  transition: background .2s;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+.topbar-hamburger:hover { background: var(--cream-2); }
+
+.mobile-dash-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 999;
+  backdrop-filter: blur(2px);
+}
+
+.mobile-dash-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 280px;
+  max-width: 85vw;
+  background: linear-gradient(180deg, var(--charcoal) 0%, #110f0a 100%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+  box-shadow: 4px 0 24px rgba(0,0,0,.4);
+}
+.mobile-dash-drawer.open {
+  transform: translateX(0);
+}
+
+.mobile-dash-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  flex-shrink: 0;
+}
+
+.mobile-dash-close {
+  width: 34px;
+  height: 34px;
+  background: rgba(255,255,255,.08);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: rgba(255,255,255,.7);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s;
+}
+.mobile-dash-close:hover { background: rgba(255,255,255,.15); }
