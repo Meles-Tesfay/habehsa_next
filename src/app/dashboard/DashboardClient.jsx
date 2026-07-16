@@ -683,6 +683,16 @@ const Dashboard = () => {
   const [editProduct, setEditProduct] = useState(null);
   const [deleteProduct, setDeleteProduct] = useState(null);
   const [saveSuccess, setSaveSuccess] = useState("");
+  const [aiMsgs, setAiMsgs] = useState([
+    {
+      role: "bot",
+      text: "Welcome! I've analyzed your store data. Your Gold Tilet Kemis is your top performer this week — up 42% vs. last week. How can I help you today?",
+    },
+  ]);
+  const [aiInput, setAiInput] = useState("");
+  const [aiTyping, setAiTyping] = useState(false);
+  const aiChatRef = useRef(null);
+  const aiIdx = useRef(0);
 
   // Live inventory from backend (via ShopContext)
   const inventory = ctxProducts;
@@ -720,18 +730,6 @@ const Dashboard = () => {
 
   const pendingOrdersCount = orders.filter(o => o.status === "pending").length;
   const NAV = getNavItems(pendingOrdersCount);
-
-
-  const [aiMsgs, setAiMsgs] = useState([
-    {
-      role: "bot",
-      text: "Welcome, Tigist! I've analyzed your store data. Your Gold Tilet Kemis is your top performer this week — up 42% vs. last week. How can I help you today?",
-    },
-  ]);
-  const [aiInput, setAiInput] = useState("");
-  const [aiTyping, setAiTyping] = useState(false);
-  const aiChatRef = useRef(null);
-  const aiIdx = useRef(0);
 
   const sendAi = (text) => {
     const msg = text || aiInput.trim();
