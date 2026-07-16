@@ -3272,19 +3272,41 @@ tbody tr:hover { background: rgba(0,0,0,.015); }
     z-index: 10;
   }
   .cdp-nav {
-    flex-direction: row;
-    overflow-x: auto;
+    flex-direction: column;
+    overflow-x: visible;
     padding: 12px 16px;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
+    white-space: normal;
   }
   .cdp-nav-item {
-    width: auto;
-    display: inline-flex;
-    white-space: nowrap;
+    width: 100%;
+    display: flex;
+    white-space: normal;
   }
   .cdp-nav-item .cdp-nav-label {
-    flex: none;
+    flex: 1;
+  }
+  
+  /* Fix Trust Strip & Shipping Grid layout */
+  .trust-strip {
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px;
+    align-items: flex-start;
+  }
+  .shipping-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Fix Admin Dashboard layout */
+  .dash-layout {
+    flex-direction: column;
+    height: auto;
+    overflow: visible;
+  }
+  .dash-sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
   }
   .cdp-logout-btn {
     margin: 16px 24px 0;

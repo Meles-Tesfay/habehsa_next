@@ -695,6 +695,14 @@ const Dashboard = () => {
     return () => clearInterval(interval);
   }, [fetchOrders]);
 
+  useEffect(() => {
+    if (!user || user.role !== "admin") {
+      router.push("/");
+    }
+  }, [user, router]);
+
+  if (!user || user.role !== "admin") return null;
+
   const pendingOrdersCount = orders.filter(o => o.status === "pending").length;
   const NAV = getNavItems(pendingOrdersCount);
 
