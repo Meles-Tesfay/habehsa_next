@@ -3300,14 +3300,41 @@ tbody tr:hover { background: rgba(0,0,0,.015); }
   /* Fix Admin Dashboard layout */
   .dash-layout {
     flex-direction: column;
-    height: auto;
-    overflow: visible;
+    height: 100vh;
+    overflow: hidden;
   }
   .dash-sidebar {
     width: 100%;
     height: auto;
-    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 12px 16px;
+    align-items: center;
+    -webkit-overflow-scrolling: touch;
   }
+  .sidebar-brand { display: none; }
+  .dash-sidebar nav {
+    flex-direction: row;
+    align-items: center;
+    padding: 0;
+    gap: 8px;
+    flex: none;
+  }
+  .nav-group-label { display: none; }
+  .dash-nav-btn {
+    width: auto;
+    white-space: nowrap;
+    padding: 8px 12px;
+  }
+  .sidebar-footer {
+    padding: 0;
+    border: none;
+    margin-left: 8px;
+    border-left: 1px solid rgba(255,255,255,.2);
+    padding-left: 16px;
+  }
+  .sidebar-user { padding: 4px 8px; }
+  .sidebar-user-name { display: none; }
   .cdp-logout-btn {
     margin: 16px 24px 0;
     justify-content: center;
