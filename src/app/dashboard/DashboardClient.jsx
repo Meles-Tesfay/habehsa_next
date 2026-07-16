@@ -1326,62 +1326,64 @@ const Dashboard = () => {
                   <button className="topbar-add-btn">Export CSV</button>
                 </div>
               </div>
-              <table aria-label="Recent Orders">
-                <thead>
-                  <tr>
-                    <th>Order</th>
-                    <th>Product</th>
-                    <th>Customer</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th>Amount</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {orders.slice(0, 5).map((o) => (
-                    <tr key={o.orderId || o._id}>
-                      <td>
-                        <span className="order-id">{o.orderId}</span>
-                      </td>
-                      <td>
-                        <div className="product-cell">
-                          {o.items && o.items[0] && (
-                            <img
-                              src={getImageUrl(o.items[0].image)}
-                              alt=""
-                              className="product-cell-thumb"
-                              onError={(e) => { e.target.style.display = "none"; }}
-                            />
-                          )}
-                          <div>
-                            <div className="product-cell-name">{o.customerName}</div>
-                            <div className="product-cell-sub">{o.items?.length || 1} item{o.items?.length !== 1 ? 's' : ''}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td style={{ fontSize: 13.5 }}>{o.customerEmail}</td>
-                      <td>
-                        <StatusBadge status={o.status} />
-                      </td>
-                      <td style={{ fontSize: 12.5, color: "var(--muted)" }}>
-                        {new Date(o.createdAt).toLocaleDateString()}
-                      </td>
-                      <td>
-                        <span className="amount-cell">${o.amount?.toFixed(2) || o.amount}</span>
-                      </td>
-                      <td>
-                        <button
-                          className="row-action-btn"
-                          aria-label="More options"
-                        >
-                          <MoreVertical size={15} />
-                        </button>
-                      </td>
+              <div style={{ overflowX: "auto" }}>
+                <table aria-label="Recent Orders">
+                  <thead>
+                    <tr>
+                      <th>Order</th>
+                      <th>Product</th>
+                      <th>Customer</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                      <th>Amount</th>
+                      <th></th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {orders.slice(0, 5).map((o) => (
+                      <tr key={o.orderId || o._id}>
+                        <td>
+                          <span className="order-id">{o.orderId}</span>
+                        </td>
+                        <td>
+                          <div className="product-cell">
+                            {o.items && o.items[0] && (
+                              <img
+                                src={getImageUrl(o.items[0].image)}
+                                alt=""
+                                className="product-cell-thumb"
+                                onError={(e) => { e.target.style.display = "none"; }}
+                              />
+                            )}
+                            <div>
+                              <div className="product-cell-name">{o.customerName}</div>
+                              <div className="product-cell-sub">{o.items?.length || 1} item{o.items?.length !== 1 ? 's' : ''}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ fontSize: 13.5 }}>{o.customerEmail}</td>
+                        <td>
+                          <StatusBadge status={o.status} />
+                        </td>
+                        <td style={{ fontSize: 12.5, color: "var(--muted)" }}>
+                          {new Date(o.createdAt).toLocaleDateString()}
+                        </td>
+                        <td>
+                          <span className="amount-cell">${o.amount?.toFixed(2) || o.amount}</span>
+                        </td>
+                        <td>
+                          <button
+                            className="row-action-btn"
+                            aria-label="More options"
+                          >
+                            <MoreVertical size={15} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -1412,42 +1414,43 @@ const Dashboard = () => {
                   <button className="topbar-add-btn">Export CSV</button>
                 </div>
               </div>
-              <table aria-label="All Orders">
-                <thead>
-                  <tr>
-                    <th>Order</th>
-                    <th>Product</th>
-                    <th>Customer</th>
-                    <th>Country</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th>Amount</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredOrders.map((o) => (
-                    <tr key={o.orderId || o._id}>
-                      <td>
-                        <span className="order-id">{o.orderId}</span>
-                      </td>
-                      <td>
-                        <div className="product-cell">
-                          {o.items && o.items[0] && (
-                            <img
-                              src={getImageUrl(o.items[0].image)}
-                              alt=""
-                              className="product-cell-thumb"
-                              onError={(e) => { e.target.style.display = "none"; }}
-                            />
-                          )}
-                          <div>
-                            <div className="product-cell-name">{o.customerName}</div>
-                            <div className="product-cell-sub">{o.items?.length || 1} item{o.items?.length !== 1 ? 's' : ''}</div>
+              <div style={{ overflowX: "auto" }}>
+                <table aria-label="All Orders">
+                  <thead>
+                    <tr>
+                      <th>Order</th>
+                      <th>Product</th>
+                      <th>Customer</th>
+                      <th>Country</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                      <th>Amount</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredOrders.map((o) => (
+                      <tr key={o.orderId || o._id}>
+                        <td>
+                          <span className="order-id">{o.orderId}</span>
+                        </td>
+                        <td>
+                          <div className="product-cell">
+                            {o.items && o.items[0] && (
+                              <img
+                                src={getImageUrl(o.items[0].image)}
+                                alt=""
+                                className="product-cell-thumb"
+                                onError={(e) => { e.target.style.display = "none"; }}
+                              />
+                            )}
+                            <div>
+                              <div className="product-cell-name">{o.customerName}</div>
+                              <div className="product-cell-sub">{o.items?.length || 1} item{o.items?.length !== 1 ? 's' : ''}</div>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td style={{ fontSize: 13.5 }}>{o.customerEmail}</td>
+                        </td>
+                        <td style={{ fontSize: 13.5 }}>{o.customerEmail}</td>
                       <td style={{ fontSize: 13 }}>{o.phone}</td>
                       <td>
                         <select
@@ -1519,6 +1522,7 @@ const Dashboard = () => {
                   )}
                 </tbody>
               </table>
+            </div>
             </div>
           </div>
         )}
